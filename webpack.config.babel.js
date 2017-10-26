@@ -2,6 +2,7 @@ import webpack from 'webpack';
 
 import path from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
+import ExtractTextPlugin from 'extract-text-webpack-plugin';
 
 process.noDeprecation = true;
 
@@ -22,10 +23,6 @@ const webpackConfig = {
         }
       },
       {
-        test: /\.vue$/,
-        loader: 'vue-loader'
-      },
-      {
         test: /\.js$/,
         loader: 'babel-loader',
         exclude: /node_modules/,
@@ -38,7 +35,15 @@ const webpackConfig = {
             if (process.env.NODE_ENV === 'development') return '[name].[ext]?[hash]';
             return '[hash].[ext]'
           },
-          outputPath: './img/'
+          outputPath: 'img/'
+        }
+      },
+      {
+        test: /\.(woff|woff2)$/,
+        loader: 'file-loader',
+        options: {
+          name: '[name].[ext]',
+          outputPath: 'fonts/'
         }
       }
     ]
@@ -54,6 +59,8 @@ const webpackConfig = {
     extensions: ['*', '.js', '.vue', '.json'],
     alias: {
       'vue$': 'vue/dist/vue.esm.js',
+      components: path.resolve(__dirname, './src/components'),
+      fonts: path.resolve(__dirname, './src/assets/fonts'),
       img: path.resolve(__dirname, './src/assets/img'),
       styl: path.resolve(__dirname, './src/assets/styl')
     }
@@ -67,12 +74,17 @@ const webpackConfig = {
 
   performance: {
     hints: false
-  },
-
-  devtool: '#eval-source-map'
+  }
 }
 
 if (process.env.NODE_ENV === 'development') {
+  webpackConfig.devtool = '#eval-source-map';
+
+  webpackConfig.module.rules.unshift({
+    test: /\.vue$/,
+    loader: 'vue-loader'
+  });
+
   webpackConfig.plugins = (webpackConfig.plugins || []).concat([
     new webpack.NamedModulesPlugin()
   ]);
@@ -80,6 +92,14 @@ if (process.env.NODE_ENV === 'development') {
 
 if (process.env.NODE_ENV === 'production') {
   webpackConfig.devtool = '#source-map';
+
+  webpackConfig.module.rules.unshift({
+    test: /\.vue$/,
+    loader: 'vue-loader',
+    options: {
+      extractCSS: true
+    }
+  });
 
   webpackConfig.plugins = (webpackConfig.plugins || []).concat([
     new webpack.DefinePlugin({
@@ -97,6 +117,10 @@ if (process.env.NODE_ENV === 'production') {
 
     new webpack.LoaderOptionsPlugin({
       minimize: true
+    }),
+
+    new ExtractTextPlugin({
+     filename: './css/style.css?[hash]'
     })
   ]);
 };

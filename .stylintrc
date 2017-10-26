@@ -4,6 +4,9 @@
   "colors": "always",
   "commaSpace": "always",
   "commentSpace": "always",
+  "customProperties": [
+    "grid-gap"
+  ],
   "depthLimit": 4,
   "duplicates": false,
   "globalDupe": false,
